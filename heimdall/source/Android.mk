@@ -61,3 +61,65 @@ endif
 
 LOCAL_MODULE := heimdall
 include $(BUILD_HOST_EXECUTABLE)
+
+
+###### Cheeky Static libusb for the target #######
+#
+# NOTE: We'd probably be better of using libusbhost
+# 
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+  core.c \
+  descriptor.c \
+  io.c \
+  sync.c
+ 
+LOCAL_SRC_FILES := $(addprefix ../../../libusb/libusb/,$(LOCAL_SRC_FILES))
+LOCAL_MODULE := libusb
+
+LOCAL_C_INCLUDES := \
+  external/libusb \
+  external/libusb/libusb
+
+include $(BUILD_STATIC_LIBRARY)
+
+###### Heimdall for the target #######
+
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+  Arguments.cpp \
+  ClosePcScreenAction.cpp \
+  DownloadPitAction.cpp \
+  FlashAction.cpp \
+  InfoAction.cpp \
+  PrintPitAction.cpp \
+  VersionAction.cpp \
+  BridgeManager.cpp \
+  DetectAction.cpp \
+  DumpAction.cpp \
+  HelpAction.cpp \
+  Interface.cpp \
+  Utility.cpp \
+  main.cpp \
+  ../../libpit/Source/libpit.cpp
+  
+LOCAL_SRC_FILES += $(LIBUSB_SRC_FILES)
+
+LOCAL_C_INCLUDES := \
+  bionic \
+  external/heimdall/libpit/Source \
+  external/libusb/libusb \
+  external/stlport/stlport \
+
+LOCAL_CPPFLAGS := -Wno-non-virtual-dtor -fno-strict-aliasing -Wno-delete-non-virtual-dtor
+
+LOCAL_STATIC_LIBRARIES := libusb
+LOCAL_SHARED_LIBRARIES := libstdc++ libstlport
+
+LOCAL_MODULE := heimdall
+include $(BUILD_EXECUTABLE)
+
